@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Amazon Price Tracker",
+  "version": "0.1.0",
+  "identifier": "com.local.amazonpricetracker",
+  "build": {
+    "frontendDist": "../frontend/dist",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeDevCommand": "../scripts/dev.sh",
+    "beforeBuildCommand": "pnpm --dir ../frontend build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "Amazon Price Tracker & Refund Assistant",
+        "width": 1200,
+        "height": 800,
+        "minWidth": 880,
+        "minHeight": 640,
+        "resizable": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:8787 http://localhost:8787; img-src 'self' data:; style-src 'self' 'unsafe-inline'; base-uri 'self'; frame-ancestors 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["app", "dmg"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "minimumSystemVersion": "13.0"
+    }
+  }
+}
