@@ -1,0 +1,23 @@
+{
+  "name": "groups-browser",
+  "productName": "Groups Browser",
+  "version": "1.0.0",
+  "description": "A macOS library of page groups. One preview at a time, no tab bar.",
+  "main": "src/main/main.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/url.test.js test/copy.test.js test/order.test.js test/thumbnail-policy.test.js test/metadata.test.js test/store.test.js",
+    "test:e2e": "node test/e2e.js",
+    "test:sites": "node test/live-sites.js",
+    "test:all": "npm test && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@fontsource/fraunces": "^5.3.0",
+    "@fontsource/outfit": "^5.3.0",
+    "electron": "^45.3.0",
+    "playwright": "^1.65.0"
+  }
+}
