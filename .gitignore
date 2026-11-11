@@ -1,0 +1,16 @@
+.venv/
+*.egg-info/
+__pycache__/
+.pytest_cache/
+*.pyc
+node_modules/
+dist/
+src-tauri/target/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+.env
+data/
+.DS_Store
+.impeccable/review/
+.impeccable/build/

@@ -1,0 +1,6 @@
+{
+  "identifier": "default",
+  "description": "Local window. No shell, no remote fetch beyond the page CSP.",
+  "windows": ["main"],
+  "permissions": ["core:default"]
+}
