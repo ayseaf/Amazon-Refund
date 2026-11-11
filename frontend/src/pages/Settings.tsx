@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { deletePurchases, getSecret, getSettings, putSecret, saveSettings } from "../api";
+import { deleteAmazonSession, deletePurchases, getSecret, getSettings, putSecret, saveSettings, scanAmazonOrders, startAmazonSignIn } from "../api";
 import { useCatalog } from "../catalog";
 import { centsToDollars, dollarsToCents } from "../format";
 import type { AppSettings } from "../types";
@@ -131,6 +131,28 @@ export function SettingsPage() {
     }
   }
 
+  async function onAmazon(action: "sign-in" | "scan" | "sign-out") {
+    setBusy(true);
+    setError(null);
+    setMessage(null);
+    try {
+      if (action === "sign-in") {
+        const result = await startAmazonSignIn();
+        setMessage(result.message);
+      } else if (action === "scan") {
+        const result = await scanAmazonOrders();
+        setMessage(result.message);
+      } else {
+        await deleteAmazonSession();
+        setMessage("The Amazon session on this computer was deleted. The password was never stored.");
+      }
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "Amazon could not be reached from this computer.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function onDelete() {
     setBusy(true);
     setError(null);
@@ -208,6 +230,30 @@ export function SettingsPage() {
       ) : loaded ? null : (
         <p className="status-line">Loading settings…</p>
       )}
+      <section className="panel stack">
+        <h2>Amazon sign-in</h2>
+        <p>
+          There is no Amazon password field. Open Amazon in a real browser window and type your password
+          and any verification code there yourself. This app stores only the session cookies, encrypted,
+          on this computer.
+        </p>
+        {catalogState.status === "ready" ? (
+          <p className="hint">
+            Session: {catalogState.session.status}. Marketplace amazon.com. Password stored: no.
+            {catalogState.session.last_challenge ? ` Last challenge: ${catalogState.session.last_challenge}.` : ""}
+            {catalogState.session.last_error ? ` ${catalogState.session.last_error}` : ""}
+          </p>
+        ) : null}
+        <button type="button" data-testid="amazon-sign-in" disabled={busy} onClick={() => void onAmazon("sign-in")}>
+          Open Amazon sign-in
+        </button>
+        <button type="button" data-testid="amazon-scan" disabled={busy} onClick={() => void onAmazon("scan")}>
+          Review orders from the last 30 days
+        </button>
+        <button type="button" data-testid="amazon-sign-out" disabled={busy} onClick={() => void onAmazon("sign-out")}>
+          Sign out / delete Amazon session
+        </button>
+      </section>
       <form className="panel stack" onSubmit={onStoreKey}>
         <h2>Keepa API key</h2>
         <p className="muted">

@@ -1,4 +1,4 @@
-import type { AppInfo, AppSettings, Catalog, Stats } from "../types";
+import type { AmazonSession, AppInfo, AppSettings, Catalog, LiveOrders, Opportunities, Stats } from "../types";
 
 export const fixtureCatalog: Catalog = {
   data_origin: "sample",
@@ -178,6 +178,33 @@ export const fixtureStats: Stats = {
   stored_orders: 0,
   stored_items: 0,
   sample_rows_included: false,
+};
+
+export const fixtureSession: AmazonSession = {
+  status: "signed_out",
+  marketplace: "amazon.com",
+  cookie_count: null,
+  saved_at: null,
+  last_scan_status: null,
+  last_scan_finished_at: null,
+  last_challenge: null,
+  last_error: null,
+  next_scan_eligible_at: null,
+  accepts_amazon_password: false,
+  origin_label: "Live from Amazon",
+};
+
+export const fixtureLiveOrders: LiveOrders = {
+  data_origin: "amazon_browser",
+  origin_label: "Live from Amazon",
+  items: [],
+};
+
+export const fixtureOpportunities: Opportunities = {
+  data_origin: "amazon_browser",
+  origin_label: "Live from Amazon",
+  items: [],
+  nothing_is_submitted: true,
 };
 
 export const fixtureSettings: AppSettings = {

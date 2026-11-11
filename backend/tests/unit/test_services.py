@@ -24,7 +24,7 @@ def test_defaults_and_interval_bounds(migrated_conn):
     assert settings["desktop_notifications"] is True
     assert settings["email_notifications"] is False
     assert settings["email_available"] is False
-    assert settings["phase"] == 1
+    assert settings["phase"] == 2
 
     updated = update_settings(
         migrated_conn,

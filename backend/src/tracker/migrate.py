@@ -44,7 +44,9 @@ def apply_migrations(
                     f"Migration {version} was already applied with a different checksum"
                 )
             continue
+        connection.execute("PRAGMA foreign_keys = OFF")
         connection.executescript(path.read_text(encoding="utf-8"))
+        connection.execute("PRAGMA foreign_keys = ON")
         connection.execute(
             "INSERT INTO schema_migrations (version, name, checksum, applied_at) VALUES (?, ?, ?, ?)",
             (version, path.name, checksum, utc_now()),

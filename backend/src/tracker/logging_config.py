@@ -4,12 +4,22 @@ import logging
 import re
 
 _ASSIGNMENT = re.compile(
-    r"(?i)\b(api[_-]?key|secret|password|token)\b(\s*[:=]\s*)(\S+)"
+    r"(?i)\b(api[_-]?key|secret|password|token|session-id|session-token|ubid-main|x-main|at-main|sess-at-main)\b(\s*[:=]\s*)(\S+)"
 )
 _BEARER = re.compile(r"(?i)\bbearer\s+\S+")
+_COOKIE_HEADER = re.compile(r"(?i)\bCookie:\s*[^\r\n]+")
+_HTML_PASSWORD = re.compile(
+    r"(?i)(type\s*=\s*['\"]password['\"][^>]*value\s*=\s*['\"])[^'\"]*"
+)
+_HTML_PASSWORD_VALUE_FIRST = re.compile(
+    r"(?i)(value\s*=\s*['\"])[^'\"]*(['\"][^>]*type\s*=\s*['\"]password['\"])"
+)
 
 
 def redact(text: str) -> str:
+    text = _HTML_PASSWORD.sub(r"\1[redacted]", text)
+    text = _HTML_PASSWORD_VALUE_FIRST.sub(r"\1[redacted]\2", text)
+    text = _COOKIE_HEADER.sub("Cookie: [redacted]", text)
     text = _ASSIGNMENT.sub(lambda match: f"{match.group(1)}{match.group(2)}[redacted]", text)
     text = _BEARER.sub("Bearer [redacted]", text)
     return text
@@ -35,6 +45,8 @@ class RedactionFilter(logging.Filter):
 
 def configure_logging() -> None:
     logger = logging.getLogger("tracker")
+    if not any(isinstance(item, RedactionFilter) for item in logger.filters):
+        logger.addFilter(RedactionFilter())
     if logger.handlers:
         return
     handler = logging.StreamHandler()

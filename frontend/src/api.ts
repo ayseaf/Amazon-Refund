@@ -1,4 +1,16 @@
-import type { ApiFailure, AppInfo, AppSettings, Catalog, PriceCheckResult, SecretStatus, Stats } from "./types";
+import type {
+  AmazonActionResult,
+  AmazonSession,
+  ApiFailure,
+  AppInfo,
+  AppSettings,
+  Catalog,
+  LiveOrders,
+  Opportunities,
+  PriceCheckResult,
+  SecretStatus,
+  Stats,
+} from "./types";
 
 function apiBase(): string {
   return import.meta.env.VITE_API_BASE ?? "http://127.0.0.1:8787";
@@ -69,6 +81,30 @@ export async function requestPriceCheck(): Promise<PriceCheckResult> {
     body: "{}",
   });
   return (await response.json()) as PriceCheckResult;
+}
+
+export function getAmazonSession(): Promise<AmazonSession> {
+  return request("/api/v1/amazon/session");
+}
+
+export function getLiveOrders(): Promise<LiveOrders> {
+  return request("/api/v1/orders");
+}
+
+export function getOpportunities(): Promise<Opportunities> {
+  return request("/api/v1/opportunities");
+}
+
+export function startAmazonSignIn(): Promise<AmazonActionResult> {
+  return request("/api/v1/amazon/sign-in", { method: "POST", body: "{}" });
+}
+
+export function scanAmazonOrders(): Promise<AmazonActionResult> {
+  return request("/api/v1/amazon/scan", { method: "POST", body: "{}" });
+}
+
+export function deleteAmazonSession(): Promise<{ status: string; deleted: boolean; accepts_amazon_password: false }> {
+  return request("/api/v1/amazon/session", { method: "DELETE" });
 }
 
 export function deletePurchases(): Promise<{ deleted: { orders: number }; sample_data_affected: boolean }> {

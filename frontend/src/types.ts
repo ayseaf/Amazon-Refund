@@ -209,3 +209,71 @@ export interface ApiFailure extends Error {
   status?: number;
   payload?: unknown;
 }
+
+export interface AmazonSession {
+  status: string;
+  marketplace: "amazon.com";
+  cookie_count: number | null;
+  saved_at: string | null;
+  last_scan_status: string | null;
+  last_scan_finished_at: string | null;
+  last_challenge: string | null;
+  last_error: string | null;
+  next_scan_eligible_at: string | null;
+  accepts_amazon_password: false;
+  origin_label: "Live from Amazon";
+}
+
+export interface LiveItem {
+  data_origin: "amazon_browser";
+  origin_label: "Live from Amazon";
+  order_id: string | null;
+  title: string | null;
+  purchased_at: string | null;
+  asin: string | null;
+  quantity: number | null;
+  unit_price_cents: number | null;
+  current_price_cents: number | null;
+  price_checked_at: string | null;
+  seller_name: string | null;
+  fulfilled_by: string | null;
+  condition: string | null;
+  delivered_on: string | null;
+  return_eligible: boolean | null;
+  return_window_end: string | null;
+  product_url: string | null;
+  monitoring_status: string;
+  verdict: string | null;
+  verdict_label: string | null;
+  rule: string | null;
+  missing: string[];
+  potential_savings_cents: number | null;
+  savings_note: string | null;
+  not_guaranteed: true;
+  guaranteed: false;
+  draft_kind: string | null;
+  draft_text: string | null;
+  policy_text: string | null;
+}
+
+export interface LiveOrders {
+  data_origin: "amazon_browser";
+  origin_label: "Live from Amazon";
+  items: LiveItem[];
+}
+
+export interface Opportunities {
+  data_origin: "amazon_browser";
+  origin_label: "Live from Amazon";
+  items: LiveItem[];
+  nothing_is_submitted: true;
+}
+
+export interface AmazonActionResult {
+  status: string;
+  message: string;
+  challenge_kind?: string | null;
+  accepts_amazon_password: false;
+  submitted?: false;
+  orders_seen?: number;
+}

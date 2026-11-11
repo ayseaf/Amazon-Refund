@@ -12,13 +12,13 @@ from tracker.db import connect
 def test_health_ready_and_info(client):
     health = client.get("/health")
     assert health.status_code == 200
-    assert health.json() == {"status": "ok", "service": "amazon-price-tracker", "phase": 1}
+    assert health.json() == {"status": "ok", "service": "amazon-price-tracker", "phase": 2}
     assert client.get("/health/live").json()["status"] == "live"
     ready = client.get("/health/ready")
     assert ready.status_code == 200
-    assert ready.json()["migrations"] == 1
+    assert ready.json()["migrations"] == 2
     info = client.get("/api/v1/info").json()
-    assert info["phase"] == 1
+    assert info["phase"] == 2
     assert info["sample_data_only"] is True
     assert info["amazon_connected"] is False
     assert info["accepts_amazon_password"] is False
@@ -158,7 +158,7 @@ def test_default_bind_host_is_loopback(monkeypatch):
     assert Settings(_env_file=None).host == "127.0.0.1"
 
 
-def test_production_code_does_not_call_amazon_or_collect_a_password():
+def test_production_code_does_not_collect_a_password_or_submit_to_amazon():
     repo = Path(__file__).resolve().parents[3]
     source = []
     for path in (repo / "backend" / "src").rglob("*.py"):
@@ -169,8 +169,10 @@ def test_production_code_does_not_call_amazon_or_collect_a_password():
             if path.suffix in {".ts", ".tsx", ".css"}:
                 source.append(path.read_text(encoding="utf-8"))
     text = "\n".join(source)
-    assert "https://www.amazon.com" not in text
-    assert "amazon.com/ap/signin" not in text
-    assert "AmazonSession" not in text
     assert "AMAZON_PASSWORD" not in text
     assert "amazon_password" in text
+    assert "ap_password" not in text
+    assert ".fill(" not in text
+    assert "https://www.amazon.com/gp/buy" not in text
+    assert "https://www.amazon.com/checkout" not in text
+    assert "https://www.amazon.com/your-orders/orders?timeFilter=last30" in text

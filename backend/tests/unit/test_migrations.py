@@ -24,13 +24,17 @@ EXPECTED_TABLES = {
     "task_reservations",
     "audit_log",
     "schema_migrations",
+    "amazon_session_meta",
+    "amazon_scan_runs",
+    "item_verdicts",
+    "review_gaps",
 }
 
 
 def test_migrations_create_the_phase_one_schema(tmp_path):
     connection = connect(tmp_path / "fresh.sqlite")
     applied = apply_migrations(connection)
-    assert applied == ["001"]
+    assert applied == ["001", "002"]
     assert table_names(connection) == EXPECTED_TABLES
 
 
@@ -39,7 +43,7 @@ def test_migrations_are_idempotent(tmp_path):
     apply_migrations(connection)
     assert apply_migrations(connection) == []
     count = connection.execute("SELECT COUNT(*) AS n FROM schema_migrations").fetchone()["n"]
-    assert count == 1
+    assert count == 2
 
 
 def test_changed_checksum_is_rejected(tmp_path):

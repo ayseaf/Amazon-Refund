@@ -27,7 +27,7 @@ export function SavingsPage() {
               {state.catalog.savings_history.map((entry) => (
                 <tr key={`${entry.kind}-${entry.order_id}`}>
                   <td>
-                    <span className="sample-tag">{entry.sample_label}</span> {entry.title}
+                    <span className="sample-tag">Sample data</span> {entry.title}
                   </td>
                   <td>{entry.kind === "confirmed_refund" ? "Confirmed refund (sample)" : "Estimated gap"}</td>
                   <td>

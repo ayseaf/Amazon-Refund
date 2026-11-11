@@ -3,7 +3,16 @@ import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { AppRoutes } from "./App";
-import { fixtureCatalog, fixtureInfo, fixtureSettings, fixtureStats, jsonResponse } from "./test/fixtures";
+import {
+  fixtureCatalog,
+  fixtureInfo,
+  fixtureLiveOrders,
+  fixtureOpportunities,
+  fixtureSession,
+  fixtureSettings,
+  fixtureStats,
+  jsonResponse,
+} from "./test/fixtures";
 
 const SECTIONS: Array<[string, string]> = [
   ["nav-dashboard", "Dashboard"],
@@ -25,6 +34,12 @@ function installFetch() {
       if (url.endsWith("/api/v1/sample/catalog")) return jsonResponse(fixtureCatalog);
       if (url.endsWith("/api/v1/info")) return jsonResponse(fixtureInfo);
       if (url.endsWith("/api/v1/stats")) return jsonResponse(fixtureStats);
+      if (url.endsWith("/api/v1/amazon/session") && (!init?.method || init.method === "GET")) return jsonResponse(fixtureSession);
+      if (url.endsWith("/api/v1/amazon/session") && init?.method === "DELETE") {
+        return jsonResponse({ status: "signed_out", deleted: true, accepts_amazon_password: false });
+      }
+      if (url.endsWith("/api/v1/orders")) return jsonResponse(fixtureLiveOrders);
+      if (url.endsWith("/api/v1/opportunities")) return jsonResponse(fixtureOpportunities);
       if (url.endsWith("/api/v1/settings") && (!init?.method || init.method === "GET")) return jsonResponse(fixtureSettings);
       if (url.endsWith("/api/v1/settings") && init?.method === "PUT") {
         return jsonResponse({ ...fixtureSettings, monitoring_interval_minutes: 120 });
@@ -142,6 +157,9 @@ describe("application shell", () => {
         if (url.endsWith("/api/v1/sample/catalog")) return jsonResponse(fixtureCatalog);
         if (url.endsWith("/api/v1/info")) return jsonResponse(fixtureInfo);
         if (url.endsWith("/api/v1/stats")) return jsonResponse(fixtureStats);
+        if (url.endsWith("/api/v1/amazon/session")) return jsonResponse(fixtureSession);
+        if (url.endsWith("/api/v1/orders")) return jsonResponse(fixtureLiveOrders);
+        if (url.endsWith("/api/v1/opportunities")) return jsonResponse(fixtureOpportunities);
         if (url.endsWith("/api/v1/settings") && (!init?.method || init.method === "GET")) return jsonResponse(fixtureSettings);
         if (url.endsWith("/api/v1/secrets/keepa_api_key")) {
           return jsonResponse(
@@ -174,5 +192,23 @@ describe("application shell", () => {
     expect(await screen.findByText("[SAMPLE] Over-ear headphones")).toBeInTheDocument();
     await user.click(screen.getByTestId("nav-savings"));
     expect(await screen.findByText("Estimated gap")).toBeInTheDocument();
+  });
+
+  it("keeps live and sample labels apart and offers sign-out without an Amazon password field", async () => {
+    const user = userEvent.setup();
+    const calls = installFetch();
+    renderApp();
+    await screen.findByTestId("stat-estimated-savings");
+    await user.click(screen.getByTestId("nav-orders"));
+    expect(await screen.findByTestId("opportunities")).toBeInTheDocument();
+    expect(screen.getAllByText("Sample data").length).toBeGreaterThan(0);
+    expect(screen.getByText("No live orders yet. Sign in from Settings and review the last 30 days.")).toBeInTheDocument();
+    await user.click(screen.getByTestId("nav-settings"));
+    expect(screen.queryByLabelText(/amazon password/i)).not.toBeInTheDocument();
+    expect(screen.queryByRole("textbox", { name: /amazon password/i })).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("amazon-sign-out"));
+    const signOut = calls.find((call) => call.url.endsWith("/api/v1/amazon/session") && call.init?.method === "DELETE");
+    expect(signOut).toBeTruthy();
+    expect(await screen.findByText(/Amazon session on this computer was deleted/)).toBeInTheDocument();
   });
 });

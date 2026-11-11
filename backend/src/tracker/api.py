@@ -1,16 +1,22 @@
 from __future__ import annotations
 
 import logging
+import random
 import sqlite3
 import sys
+import time
 import uuid
 from contextlib import asynccontextmanager
+from datetime import datetime, timezone
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 
 from tracker import __version__
+from tracker.amazon_browser import AmazonBrowserUnavailable, open_visible_browser
+from tracker.amazon_scan import list_live_orders, list_opportunities, review_last_30_days, run_visible_sign_in, session_view
+from tracker.amazon_session import delete_session
 from tracker.config import Settings
 from tracker.db import connect
 from tracker.logging_config import configure_logging
@@ -75,7 +81,16 @@ def record_skipped_price_check(connection: sqlite3.Connection, profile_id: str, 
     connection.commit()
 
 
-def create_app(settings: Settings | None = None) -> FastAPI:
+def _default_amazon_tools():
+    return {
+        "browser_factory": open_visible_browser,
+        "sleep": time.sleep,
+        "rng": random.SystemRandom(),
+        "now": lambda: datetime.now(timezone.utc),
+    }
+
+
+def create_app(settings: Settings | None = None, amazon_tools: dict | None = None) -> FastAPI:
     settings = settings or Settings(_env_file=None)
 
     @asynccontextmanager
@@ -106,6 +121,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
     )
     app.state.settings = settings
+    app.state.amazon_tools = amazon_tools or _default_amazon_tools()
     app.add_middleware(
         CORSMiddleware,
         allow_origins=ALLOWED_ORIGINS,
@@ -133,7 +149,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.get("/health")
     def health():
-        return {"status": "ok", "service": "amazon-price-tracker", "phase": 1}
+        return {"status": "ok", "service": "amazon-price-tracker", "phase": 2}
 
     @app.get("/health/live")
     def live():
@@ -146,15 +162,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             raise ApiError(503, "database_not_ready", "Migrations have not been applied")
         return {"status": "ready", "migrations": row["n"]}
 
+    def live_order_count(connection: sqlite3.Connection) -> int:
+        row = connection.execute(
+            "SELECT COUNT(*) AS n FROM orders WHERE profile_id = ? AND source = 'amazon_browser'",
+            (LOCAL_PROFILE_ID,),
+        ).fetchone()
+        return int(row["n"]) if row else 0
+
     @app.get("/api/v1/info")
-    def info():
+    def info(connection: sqlite3.Connection = Depends(db_connection)):
         secrets = app.state.secrets
+        view = session_view(connection, secrets)
+        connected = view["status"] == "signed_in"
         return {
             "name": "Amazon Price Tracker & Refund Assistant",
             "version": __version__,
-            "phase": 1,
-            "sample_data_only": True,
-            "amazon_connected": False,
+            "phase": 2,
+            "sample_data_only": live_order_count(connection) == 0,
+            "amazon_connected": connected,
             "accepts_amazon_password": False,
             "secret_backend": secrets.backend_name,
             "secret_store": store_status(secrets),
@@ -278,5 +303,84 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/v1/scheduler")
     def read_scheduler():
         return scheduler_status()
+
+    @app.get("/api/v1/amazon/session")
+    def read_amazon_session(connection: sqlite3.Connection = Depends(db_connection)):
+        return session_view(connection, app.state.secrets)
+
+    @app.post("/api/v1/amazon/sign-in")
+    def begin_sign_in(connection: sqlite3.Connection = Depends(db_connection)):
+        tools = app.state.amazon_tools
+        try:
+            browser = tools["browser_factory"]()
+        except AmazonBrowserUnavailable as exc:
+            raise ApiError(503, "browser_unavailable", str(exc)) from exc
+        result = run_visible_sign_in(
+            browser=browser,
+            connection=connection,
+            secret_store=app.state.secrets,
+            now=tools["now"](),
+            sleep=tools["sleep"],
+        )
+        return {
+            "status": result.status,
+            "message": result.message,
+            "challenge_kind": result.challenge_kind,
+            "accepts_amazon_password": False,
+            "session": session_view(connection, app.state.secrets),
+        }
+
+    @app.post("/api/v1/amazon/scan")
+    def scan_orders(connection: sqlite3.Connection = Depends(db_connection)):
+        tools = app.state.amazon_tools
+        view = session_view(connection, app.state.secrets)
+        if view["status"] != "signed_in":
+            raise ApiError(
+                409,
+                "amazon_signed_out",
+                "No Amazon session is stored on this computer. Open Amazon sign-in first. No page was opened.",
+            )
+        try:
+            browser = tools["browser_factory"]()
+        except AmazonBrowserUnavailable as exc:
+            raise ApiError(503, "browser_unavailable", str(exc)) from exc
+        result = review_last_30_days(
+            browser=browser,
+            connection=connection,
+            secret_store=app.state.secrets,
+            now=tools["now"](),
+            sleep=tools["sleep"],
+            rng=tools["rng"],
+        )
+        status_code = 200 if result.status == "succeeded" else 409
+        return JSONResponse(
+            status_code=status_code,
+            content={
+                "status": result.status,
+                "message": result.message,
+                "orders_seen": result.orders_seen,
+                "challenge_kind": result.challenge_kind,
+                "origin_label": result.origin_label,
+                "next_eligible_at": result.next_eligible_at,
+                "submitted": False,
+            },
+        )
+
+    @app.delete("/api/v1/amazon/session")
+    def sign_out(connection: sqlite3.Connection = Depends(db_connection)):
+        delete_session(app.state.secrets, connection)
+        return {
+            "status": "signed_out",
+            "deleted": True,
+            "accepts_amazon_password": False,
+        }
+
+    @app.get("/api/v1/orders")
+    def read_orders(connection: sqlite3.Connection = Depends(db_connection)):
+        return list_live_orders(connection)
+
+    @app.get("/api/v1/opportunities")
+    def read_opportunities(connection: sqlite3.Connection = Depends(db_connection)):
+        return list_opportunities(connection)
 
     return app
