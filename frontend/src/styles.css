@@ -1,0 +1,560 @@
+:root {
+  --rail: #8c1d33;
+  --rail-ink: #fff6f6;
+  --rail-deep: #731628;
+  --ground: #e4f0ea;
+  --ink: #1a2420;
+  --muted: #31423b;
+  --slip: #fffcfb;
+  --line: #c5d4cc;
+  --stamp: #8c1d33;
+  color: var(--ink);
+  background: var(--ground);
+  font-family: "Barlow", "Avenir Next", "Segoe UI", sans-serif;
+  font-size: 16px;
+  line-height: 1.45;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
+}
+
+::selection {
+  background: var(--rail);
+  color: var(--rail-ink);
+}
+
+* {
+  scrollbar-color: var(--rail) var(--ground);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.rail a:focus-visible,
+.rail .brand:focus-visible {
+  outline-color: var(--rail-ink);
+}
+
+.app {
+  display: grid;
+  grid-template-columns: 15.5rem minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.rail {
+  background: var(--rail);
+  color: var(--rail-ink);
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem 0.75rem 2rem;
+  gap: 0.15rem;
+}
+
+.brand,
+.rail a {
+  color: var(--rail-ink);
+  text-decoration: none;
+}
+
+.brand {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  padding: 0.35rem 0.7rem 1.1rem;
+}
+
+.brand strong,
+.brand-sub {
+  display: block;
+}
+
+.brand strong {
+  font-size: 0.98rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.brand-sub {
+  font-family: "Barlow Condensed", "Barlow", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+.mark {
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+}
+
+.rail a[href^="#/"] {
+  padding: 0.45rem 0.7rem;
+  border-radius: 2px;
+}
+
+.rail a[aria-current="page"] {
+  background: var(--rail-ink);
+  color: var(--rail);
+}
+
+.rail a[href^="#/"]:hover {
+  background: rgba(255, 246, 246, 0.14);
+}
+
+.rail a[aria-current="page"]:hover {
+  background: var(--rail-ink);
+  color: var(--rail-deep);
+}
+
+.main {
+  padding: 1.75rem 2rem 4rem;
+}
+
+.sheet {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  grid-template-areas:
+    "lead act"
+    "ledger ledger";
+  gap: 1rem 2rem;
+  align-items: start;
+}
+
+.lead {
+  grid-area: lead;
+}
+
+.act {
+  grid-area: act;
+}
+
+.ledger {
+  grid-area: ledger;
+}
+
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(16rem, 22rem);
+  gap: 1.25rem 2rem;
+  align-items: start;
+}
+
+.diff {
+  min-width: 12.5rem;
+}
+
+.diff .stamp,
+.diff .figure {
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+.diff .figure {
+  margin-left: 0.45rem;
+}
+
+.diff .sub {
+  display: block;
+}
+
+h1,
+h2,
+p,
+ul {
+  margin-top: 0;
+}
+
+h1 {
+  font-size: 1.85rem;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+  margin-bottom: 0.55rem;
+}
+
+h2 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 1.6rem 0 0.4rem;
+}
+
+.act h2:first-child,
+.work h2:first-child,
+aside h2:first-child {
+  margin-top: 0;
+}
+
+.lede,
+.main > p,
+.work p {
+  max-width: 68ch;
+}
+
+.lede {
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+aside p,
+aside .sub {
+  max-width: 36ch;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  background: var(--slip);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 52rem;
+}
+
+caption {
+  caption-side: bottom;
+  text-align: left;
+  color: var(--muted);
+  padding: 0.55rem 0.2rem 0;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: baseline;
+  padding: 0.7rem 0.75rem;
+  border-bottom: 1px solid var(--line);
+}
+
+td.when {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+th {
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--muted);
+}
+
+.num {
+  text-align: right;
+}
+
+.figure {
+  font-family: "Barlow Condensed", "Barlow", sans-serif;
+  font-weight: 600;
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  display: block;
+}
+
+.product-title {
+  display: block;
+  font-weight: 600;
+}
+
+.sub {
+  display: block;
+  color: var(--muted);
+  font-size: 0.88rem;
+  margin-top: 0.15rem;
+}
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6.5rem;
+  padding: 0.05rem 0.7rem 0.1rem;
+  border: 1px solid var(--stamp);
+  color: var(--stamp);
+  background: transparent;
+  font-family: "Barlow Condensed", "Barlow", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border-radius: 999px;
+  line-height: 1.35;
+}
+
+.stamp-dashed {
+  border-style: dashed;
+}
+
+.stamp-solid {
+  border-style: solid;
+}
+
+.stamp-double {
+  border-style: double;
+  border-width: 4px;
+  padding: 0.08rem 0.7rem;
+}
+
+.stamp.inking {
+  animation: ink 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes ink {
+  from {
+    opacity: 0.15;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.plain {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.plain li {
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.filters,
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1rem;
+  margin-bottom: 1rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.check-row {
+  flex-direction: row;
+  align-items: center;
+  color: var(--ink);
+  margin: 0.35rem 0;
+}
+
+input,
+select,
+button {
+  font: inherit;
+  color: var(--ink);
+}
+
+input:not([type="checkbox"]),
+select {
+  background: var(--slip);
+  border: 1px solid var(--muted);
+  border-radius: 2px;
+  padding: 0.45rem 0.55rem;
+  caret-color: var(--rail);
+  min-width: 12rem;
+}
+
+input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--rail);
+  margin: 0;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+button {
+  border-radius: 2px;
+  padding: 0.5rem 0.85rem;
+  cursor: pointer;
+}
+
+button.primary {
+  background: var(--rail);
+  color: var(--rail-ink);
+  border: 1px solid var(--rail);
+}
+
+button.primary:hover {
+  background: var(--rail-deep);
+}
+
+button.secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--ink);
+}
+
+button.secondary:hover {
+  background: var(--slip);
+}
+
+button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+fieldset {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 1.4rem 0 0;
+  padding: 0.8rem 0 0.2rem;
+}
+
+legend {
+  padding: 0;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.problem {
+  color: var(--rail-deep);
+  font-weight: 600;
+}
+
+.status {
+  color: var(--muted);
+}
+
+code {
+  font-family: "Barlow Condensed", "Barlow", sans-serif;
+  font-size: 1.05em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stamp.inking {
+    animation: none;
+  }
+}
+
+@media (max-width: 1100px) {
+  .work {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 800px) {
+  .sheet {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "lead"
+      "ledger"
+      "act";
+  }
+}
+
+@media (max-width: 800px) {
+  .table-wrap table {
+    min-width: 0;
+    width: 100%;
+  }
+
+  caption {
+    display: block;
+    width: auto;
+    max-width: 68ch;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tr {
+    padding: 0.35rem 0 0.7rem;
+  }
+
+  td {
+    border-bottom: 0;
+    padding: 0.2rem 0.75rem;
+    text-align: left;
+  }
+
+  td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+
+  td.num .figure,
+  .figure {
+    display: inline;
+  }
+}
+
+@media (max-width: 800px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .rail {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    flex-direction: row;
+    align-items: center;
+    overflow-x: auto;
+    padding: 0.4rem;
+    gap: 0.2rem;
+  }
+
+  .brand {
+    padding: 0.35rem 0.55rem;
+  }
+
+  .brand-sub {
+    display: none;
+  }
+
+  .rail a[href^="#/"] {
+    white-space: nowrap;
+  }
+
+  .main {
+    padding: 1.1rem 0.9rem 3rem;
+  }
+
+  h1 {
+    font-size: 1.5rem;
+  }
+}
