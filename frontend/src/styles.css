@@ -1,0 +1,410 @@
+:root {
+  color-scheme: light;
+  --paper: #f3efe6;
+  --ink: #1c2421;
+  --muted: #5c675f;
+  --sidebar: #1e2c28;
+  --sidebar-ink: #e7f0ea;
+  --sidebar-muted: #b7c4bb;
+  --accent: #c4622d;
+  --accent-ink: #fff8f3;
+  --card: #fffdf8;
+  --line: #e3d8c8;
+  --good: #1d6b45;
+  --warn: #8a5a12;
+  --warn-bg: #f8e7c8;
+  --bad: #8d3b32;
+  --shadow: 0 1px 2px rgba(40, 32, 22, 0.06);
+  --serif: "Iowan Old Style", Palatino, "Palatino Linotype", Georgia, serif;
+  --sans: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+h1,
+h2,
+h3,
+.stat-value,
+.brand {
+  font-family: var(--serif);
+  font-weight: 600;
+}
+
+h1 {
+  font-size: 2rem;
+  margin: 0 0 0.35rem;
+}
+
+h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+
+p {
+  margin: 0.35rem 0;
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border: 0;
+  border-radius: 999px;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  padding: 0.55rem 0.7rem;
+  color: var(--ink);
+}
+
+textarea {
+  resize: vertical;
+}
+
+label {
+  display: block;
+  margin-top: 0.8rem;
+  font-size: 0.92rem;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: 0.5rem;
+  top: -3rem;
+  background: white;
+  padding: 0.4rem 0.7rem;
+  z-index: 2;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.app {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+}
+
+.sidebar {
+  background: var(--sidebar);
+  color: var(--sidebar-ink);
+  padding: 1.4rem 1rem 2rem;
+}
+
+.brand-kicker,
+.brand-note,
+.muted,
+.hint {
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.sidebar .brand-kicker,
+.sidebar .brand-note {
+  color: var(--sidebar-muted);
+}
+
+.brand {
+  margin: 0.3rem 0;
+  font-size: 1.45rem;
+  line-height: 1.15;
+}
+
+.nav-link {
+  display: block;
+  text-decoration: none;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  margin-top: 0.2rem;
+  color: var(--sidebar-ink);
+}
+
+.nav-link.active {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+
+.main {
+  min-width: 0;
+}
+
+.sample-banner {
+  background: var(--warn-bg);
+  color: #6d4c16;
+  padding: 0.8rem 1.5rem;
+  border-bottom: 1px solid #e2c48a;
+}
+
+main {
+  padding: 1.5rem 1.6rem 3rem;
+}
+
+.page-header {
+  margin-bottom: 1rem;
+  max-width: 46rem;
+}
+
+.facts,
+.stats,
+.split {
+  display: grid;
+  gap: 0.8rem;
+}
+
+.facts {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0 0 0.6rem;
+}
+
+.facts div,
+.stat,
+.panel {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 0.9rem 1rem;
+}
+
+.facts dt {
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.facts dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--serif);
+  font-size: 1.15rem;
+}
+
+.stats {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 1rem 0;
+}
+
+.stat-label {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 2rem;
+  margin: 0.15rem 0 0;
+}
+
+.split {
+  grid-template-columns: 1fr 1fr;
+}
+
+.plain {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0 0;
+}
+
+.plain li + li {
+  margin-top: 0.45rem;
+}
+
+.sample-tag {
+  display: inline-block;
+  margin-right: 0.35rem;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 0.72rem;
+  letter-spacing: 0.04em;
+}
+
+.warn-chip {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.05rem 0.4rem;
+  border-radius: 999px;
+  background: #f3d3cf;
+  color: var(--bad);
+  font-size: 0.78rem;
+}
+
+.pill {
+  display: inline-block;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: #ece7df;
+  font-size: 0.82rem;
+  text-transform: capitalize;
+}
+
+.pill-pending,
+.pill-monitoring {
+  background: #e5f3eb;
+  color: var(--good);
+}
+
+.pill-denied,
+.pill-unavailable {
+  background: #f8e4e1;
+  color: var(--bad);
+}
+
+.pill-accepted {
+  background: #e7eef8;
+  color: #23486e;
+}
+
+.down {
+  color: var(--good);
+}
+
+.up {
+  color: var(--bad);
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+caption {
+  text-align: left;
+  padding: 0.8rem 1rem 0;
+  color: var(--muted);
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--line);
+}
+
+th {
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.mono {
+  font-variant-numeric: tabular-nums;
+}
+
+.stack {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.row-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.policy,
+.recommendation {
+  background: #f7f1e6;
+  border-left: 3px solid var(--accent);
+  padding: 0.7rem 0.9rem;
+}
+
+.action-row button {
+  margin-top: 0.6rem;
+}
+
+.check {
+  display: flex;
+  gap: 0.55rem;
+  align-items: flex-start;
+}
+
+.check input {
+  width: auto;
+  margin-top: 0.2rem;
+}
+
+.danger {
+  border-color: #e3c2be;
+}
+
+.error-text {
+  color: var(--bad);
+}
+
+.status-line.error {
+  color: var(--bad);
+}
+
+@media (max-width: 900px) {
+  .app {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar nav {
+    display: flex;
+    gap: 0.3rem;
+    overflow-x: auto;
+  }
+
+  .nav-link {
+    white-space: nowrap;
+  }
+
+  .facts,
+  .stats,
+  .split {
+    grid-template-columns: 1fr;
+  }
+}
