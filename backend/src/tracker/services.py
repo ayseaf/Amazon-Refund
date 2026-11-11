@@ -125,7 +125,7 @@ def get_settings(connection: sqlite3.Connection, profile_id: str = LOCAL_PROFILE
         "notify_monitoring_unavailable": bool(preference["notify_monitoring_unavailable"]),
         "email_available": False,
         "telegram_available": False,
-        "phase": 1,
+        "phase": 2,
     }
 
 
@@ -249,6 +249,9 @@ def forget_secret_ref(
 
 def purge_purchase_data(connection: sqlite3.Connection, profile_id: str = LOCAL_PROFILE_ID) -> dict[str, int]:
     statements = [
+        ("item_verdicts", "DELETE FROM item_verdicts WHERE profile_id = ?"),
+        ("review_gaps", "DELETE FROM review_gaps WHERE profile_id = ?"),
+        ("amazon_scan_runs", "DELETE FROM amazon_scan_runs WHERE profile_id = ?"),
         ("refund_events", "DELETE FROM refund_events WHERE profile_id = ?"),
         ("refund_requests", "DELETE FROM refund_requests WHERE profile_id = ?"),
         ("savings_estimates", "DELETE FROM savings_estimates WHERE profile_id = ?"),

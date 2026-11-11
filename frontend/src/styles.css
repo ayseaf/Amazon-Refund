@@ -249,15 +249,24 @@ main {
   margin-top: 0.45rem;
 }
 
-.sample-tag {
+.sample-tag,
+.live-tag {
   display: inline-block;
   margin-right: 0.35rem;
   padding: 0.05rem 0.35rem;
   border-radius: 999px;
-  background: var(--warn-bg);
-  color: var(--warn);
   font-size: 0.72rem;
   letter-spacing: 0.04em;
+}
+
+.sample-tag {
+  background: var(--warn-bg);
+  color: var(--warn);
+}
+
+.live-tag {
+  background: #d9eadf;
+  color: var(--good);
 }
 
 .warn-chip {

@@ -34,7 +34,10 @@ class SecretNameRejected(SecretStoreError):
     pass
 
 
-def validate_secret_name(name: str) -> str:
+SESSION_SECRET_NAME = "amazon_session"
+
+
+def validate_secret_name(name: str, *, purpose: str = "api") -> str:
     lowered = name.strip().lower()
     if lowered in {"amazon_password", "password", "card_number"} or any(
         part in lowered for part in _REJECTED_NAME_PARTS
@@ -42,6 +45,13 @@ def validate_secret_name(name: str) -> str:
         raise SecretNameRejected(
             "This application never stores Amazon passwords, payment cards, or arbitrary secrets."
         )
+    if lowered == SESSION_SECRET_NAME:
+        if purpose != "session":
+            raise SecretNameRejected(
+                "The Amazon session is stored only by the sign-in flow on this computer. "
+                "This endpoint does not accept it."
+            )
+        return lowered
     if lowered not in ALLOWED_SECRET_NAMES:
         raise SecretNameRejected("That secret is not used in this version. The only name is keepa_api_key.")
     if not name or name != lowered:
@@ -103,20 +113,20 @@ class EncryptedFileSecretStore:
         temporary.replace(self.path)
         os.chmod(self.path, 0o600)
 
-    def get(self, name: str) -> str | None:
-        validated = validate_secret_name(name)
+    def get(self, name: str, *, purpose: str = "api") -> str | None:
+        validated = validate_secret_name(name, purpose=purpose)
         return self._load().get(validated)
 
-    def put(self, name: str, value: str) -> None:
-        validated = validate_secret_name(name)
+    def put(self, name: str, value: str, *, purpose: str = "api") -> None:
+        validated = validate_secret_name(name, purpose=purpose)
         if not value or not value.strip():
             raise SecretStoreError("A secret value cannot be empty")
         payload = self._load() if self.path.exists() else {}
         payload[validated] = value
         self._save(payload)
 
-    def delete(self, name: str) -> None:
-        validated = validate_secret_name(name)
+    def delete(self, name: str, *, purpose: str = "api") -> None:
+        validated = validate_secret_name(name, purpose=purpose)
         payload = self._load() if self.path.exists() else {}
         payload.pop(validated, None)
         self._save(payload)
@@ -132,24 +142,24 @@ class EnvSecretStore:
     def __init__(self, environ: Mapping[str, str] | None = None):
         self._environ = os.environ if environ is None else environ
 
-    def _env_name(self, name: str) -> str:
-        return f"{self.prefix}{validate_secret_name(name).upper()}"
+    def _env_name(self, name: str, purpose: str) -> str:
+        return f"{self.prefix}{validate_secret_name(name, purpose=purpose).upper()}"
 
-    def get(self, name: str) -> str | None:
-        value = self._environ.get(self._env_name(name))
+    def get(self, name: str, *, purpose: str = "api") -> str | None:
+        value = self._environ.get(self._env_name(name, purpose))
         if value is None or value == "":
             return None
         return value
 
-    def put(self, name: str, value: str) -> None:
-        validate_secret_name(name)
+    def put(self, name: str, value: str, *, purpose: str = "api") -> None:
+        validate_secret_name(name, purpose=purpose)
         raise SecretStoreReadOnly(
             "The env secret store is read-only. Set TRACKER_SECRET_VALUE_KEEPA_API_KEY "
             "in the environment, or use the encrypted file store."
         )
 
-    def delete(self, name: str) -> None:
-        validate_secret_name(name)
+    def delete(self, name: str, *, purpose: str = "api") -> None:
+        validate_secret_name(name, purpose=purpose)
         raise SecretStoreReadOnly("The env secret store is read-only.")
 
 
@@ -160,22 +170,24 @@ class LockedSecretStore:
     def __init__(self, backend_name: str = "encrypted_file"):
         self.backend_name = backend_name
 
-    def get(self, name: str) -> str | None:
-        validate_secret_name(name)
+    def get(self, name: str, *, purpose: str = "api") -> str | None:
+        validate_secret_name(name, purpose=purpose)
         raise SecretStoreLocked(
             "The secret store is locked. Set TRACKER_SECRET_KEY to a Fernet key, "
             "or on a Mac set TRACKER_SECRET_BACKEND=keychain."
         )
 
-    def put(self, name: str, value: str) -> None:
-        self.get(name)
+    def put(self, name: str, value: str, *, purpose: str = "api") -> None:
+        self.get(name, purpose=purpose)
 
-    def delete(self, name: str) -> None:
-        self.get(name)
+    def delete(self, name: str, *, purpose: str = "api") -> None:
+        self.get(name, purpose=purpose)
 
 
-def keychain_add_command(name: str, value: str, service: str = KEYCHAIN_SERVICE) -> list[str]:
-    validated = validate_secret_name(name)
+def keychain_add_command(
+    name: str, value: str, service: str = KEYCHAIN_SERVICE, purpose: str = "api"
+) -> list[str]:
+    validated = validate_secret_name(name, purpose=purpose)
     if not value:
         raise SecretStoreError("A secret value cannot be empty")
     return [
@@ -191,13 +203,17 @@ def keychain_add_command(name: str, value: str, service: str = KEYCHAIN_SERVICE)
     ]
 
 
-def keychain_find_command(name: str, service: str = KEYCHAIN_SERVICE) -> list[str]:
-    validated = validate_secret_name(name)
+def keychain_find_command(
+    name: str, service: str = KEYCHAIN_SERVICE, purpose: str = "api"
+) -> list[str]:
+    validated = validate_secret_name(name, purpose=purpose)
     return ["security", "find-generic-password", "-s", service, "-a", validated, "-w"]
 
 
-def keychain_delete_command(name: str, service: str = KEYCHAIN_SERVICE) -> list[str]:
-    validated = validate_secret_name(name)
+def keychain_delete_command(
+    name: str, service: str = KEYCHAIN_SERVICE, purpose: str = "api"
+) -> list[str]:
+    validated = validate_secret_name(name, purpose=purpose)
     return ["security", "delete-generic-password", "-s", service, "-a", validated]
 
 
@@ -241,19 +257,19 @@ class KeychainSecretStore:
             raise SecretStoreError("Keychain rejected the request")
         return completed
 
-    def put(self, name: str, value: str) -> None:
-        self._run(keychain_add_command(name, value))
+    def put(self, name: str, value: str, *, purpose: str = "api") -> None:
+        self._run(keychain_add_command(name, value, purpose=purpose))
 
-    def get(self, name: str) -> str | None:
-        argv = keychain_find_command(name)
+    def get(self, name: str, *, purpose: str = "api") -> str | None:
+        argv = keychain_find_command(name, purpose=purpose)
         completed = self._runner(argv, check=False, capture_output=True, text=True)
         if completed.returncode != 0:
             return None
         value = (completed.stdout or "").strip()
         return value or None
 
-    def delete(self, name: str) -> None:
-        argv = keychain_delete_command(name)
+    def delete(self, name: str, *, purpose: str = "api") -> None:
+        argv = keychain_delete_command(name, purpose=purpose)
         completed = self._runner(argv, check=False, capture_output=True, text=True)
         if completed.returncode != 0:
             stderr = completed.stderr or ""

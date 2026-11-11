@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ErrorState, LoadingState, Money, StatusPill } from "../components/Money";
 import { useCatalog } from "../catalog";
+import { OpportunityList, OriginTag } from "../live";
 
 export function RefundsPage() {
   const state = useCatalog();
@@ -19,13 +20,20 @@ export function RefundsPage() {
       {state.status === "ready" ? (
         <div className="stack">
           <p className="policy">{state.catalog.policy_note}</p>
+          <section>
+            <h2>Live from Amazon</h2>
+            <OpportunityList
+              items={state.opportunities.items.filter((item) => item.verdict === "price_adjustment_ask_support")}
+              empty="No live price-adjustment drafts. A refund is not guaranteed, and nothing is submitted."
+            />
+          </section>
           {state.catalog.refund_requests.map((refund) => {
             const value = drafts[refund.order_id] ?? refund.draft_message;
             return (
               <article className="panel" key={refund.order_id}>
                 <header className="row-title">
                   <h2>
-                    <span className="sample-tag">{refund.sample_label}</span> {refund.title}
+                    <OriginTag live={false} /> {refund.title}
                   </h2>
                   <StatusPill value={refund.status} />
                 </header>

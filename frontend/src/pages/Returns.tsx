@@ -1,6 +1,7 @@
 import { ErrorState, LoadingState, Money } from "../components/Money";
 import { formatMoney } from "../format";
 import { useCatalog } from "../catalog";
+import { OpportunityList, OriginTag } from "../live";
 
 export function ReturnsPage() {
   const state = useCatalog();
@@ -17,11 +18,18 @@ export function ReturnsPage() {
       {state.status === "error" ? <ErrorState message={state.message} /> : null}
       {state.status === "ready" ? (
         <div className="stack">
+          <section>
+            <h2>Live from Amazon</h2>
+            <OpportunityList
+              items={state.opportunities.items.filter((item) => item.verdict === "return_possible")}
+              empty="No live return window is on file. This app does not start a return."
+            />
+          </section>
           <p className="hint">{state.catalog.clock_note}</p>
           {state.catalog.returns.map((row) => (
             <article className="panel" key={row.order_id}>
               <h2>
-                <span className="sample-tag">{row.sample_label}</span> {row.title}
+                <OriginTag live={false} /> {row.title}
               </h2>
               <p>
                 Deadline {row.return_deadline_at ?? "unknown"}

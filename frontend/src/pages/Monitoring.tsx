@@ -26,7 +26,10 @@ export function MonitoringPage() {
     <section>
       <header className="page-header">
         <h1>Price Monitoring</h1>
-        <p>Hourly checks stay off until a permitted price source is configured. This button does not invent a price.</p>
+        <p>
+          A signed-in review reads public product pages one at a time, no more than once an hour.
+          This button does not invent a price, and it does not run until you are signed in on this Mac.
+        </p>
       </header>
       {state.status === "loading" ? <LoadingState /> : null}
       {state.status === "error" ? <ErrorState message={state.message} /> : null}
@@ -70,7 +73,7 @@ export function MonitoringPage() {
                 {state.catalog.monitoring.rows.map((row) => (
                   <tr key={row.order_id}>
                     <td>
-                      <span className="sample-tag">{row.sample_label}</span> {row.title}
+                      <span className="sample-tag">Sample data</span> {row.title}
                       {row.monitoring_note ? <div className="muted">{row.monitoring_note}</div> : null}
                     </td>
                     <td>

@@ -1,6 +1,7 @@
 import { Difference, ErrorState, LoadingState } from "../components/Money";
 import { formatMoney } from "../format";
 import { useCatalog } from "../catalog";
+import { OriginTag } from "../live";
 
 export function DashboardPage() {
   const state = useCatalog();
@@ -8,7 +9,10 @@ export function DashboardPage() {
     <section>
       <header className="page-header">
         <h1>Dashboard</h1>
-        <p>A local view of sample savings. Real orders stay at zero until you import them.</p>
+        <p>
+          The totals below are sample data. Live orders from a review on this computer are listed
+          separately and are never mixed into those totals.
+        </p>
       </header>
       {state.status === "loading" ? <LoadingState /> : null}
       {state.status === "error" ? <ErrorState message={state.message} /> : null}
@@ -33,6 +37,19 @@ export function DashboardPage() {
             </div>
           </dl>
           <p className="hint">{state.catalog.clock_note}</p>
+          <section className="panel">
+            <h2>Live from Amazon</h2>
+            <p>
+              {state.session.status === "signed_in"
+                ? "A session is stored on this computer. The password is not."
+                : "Not signed in. Amazon has not been contacted."}
+            </p>
+            <p>
+              Live orders {state.live.items.length}. Opportunities {state.opportunities.items.length}. Last scan{" "}
+              {state.session.last_scan_finished_at ?? "never"}.
+            </p>
+            {state.session.last_error ? <p className="error-text">{state.session.last_error}</p> : null}
+          </section>
           <div className="stats">
             <article className="stat">
               <p className="stat-label">Products monitored</p>
@@ -59,7 +76,7 @@ export function DashboardPage() {
               <ul className="plain">
                 {state.catalog.dashboard.recent_price_changes.map((change) => (
                   <li key={change.order_id}>
-                    <span className="sample-tag">{change.sample_label}</span> {change.title}{" "}
+                    <OriginTag live={false} /> {change.title}{" "}
                     <Difference cents={change.difference_cents} />
                   </li>
                 ))}
@@ -70,7 +87,7 @@ export function DashboardPage() {
               <ul className="plain">
                 {state.catalog.dashboard.upcoming_return_deadlines.map((deadline) => (
                   <li key={deadline.order_id}>
-                    <span className="sample-tag">{deadline.sample_label}</span> {deadline.title}
+                    <OriginTag live={false} /> {deadline.title}
                     <span className="warn-chip">{deadline.warning}</span>
                   </li>
                 ))}

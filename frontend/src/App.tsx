@@ -26,7 +26,7 @@ export function AppRoutes() {
           Skip to content
         </a>
         <aside className="sidebar">
-          <p className="brand-kicker">Phase 1 · local</p>
+          <p className="brand-kicker">Phase 2 · local</p>
           <p className="brand">Price Tracker & Refund Assistant</p>
           <p className="brand-note">Independent tool. Not affiliated with Amazon.</p>
           <nav aria-label="Sections">
@@ -45,9 +45,8 @@ export function AppRoutes() {
         </aside>
         <div className="main">
           <div className="sample-banner" data-testid="sample-banner" role="note">
-            SAMPLE DATA. The orders, prices, and refund amounts in this window are fictional
-            illustrations. Nothing is loaded from an Amazon account. A price adjustment or refund is
-            not guaranteed.
+            SAMPLE DATA stays labeled Sample data. Orders read from your own amazon.com sign-in are
+            labeled Live from Amazon. A price adjustment or refund is not guaranteed.
           </div>
           <main id="content">
             <Routes>

@@ -1,11 +1,19 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { getCatalog, getInfo, getStats } from "./api";
-import type { AppInfo, Catalog, Stats } from "./types";
+import { getAmazonSession, getCatalog, getInfo, getLiveOrders, getOpportunities, getStats } from "./api";
+import type { AmazonSession, AppInfo, Catalog, LiveOrders, Opportunities, Stats } from "./types";
 
 export type CatalogState =
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "ready"; catalog: Catalog; info: AppInfo; stats: Stats };
+  | {
+      status: "ready";
+      catalog: Catalog;
+      info: AppInfo;
+      stats: Stats;
+      session: AmazonSession;
+      live: LiveOrders;
+      opportunities: Opportunities;
+    };
 
 const CatalogContext = createContext<CatalogState>({ status: "loading" });
 
@@ -18,10 +26,10 @@ export function CatalogProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getCatalog(), getInfo(), getStats()])
-      .then(([catalog, info, stats]) => {
+    Promise.all([getCatalog(), getInfo(), getStats(), getAmazonSession(), getLiveOrders(), getOpportunities()])
+      .then(([catalog, info, stats, session, live, opportunities]) => {
         if (!cancelled) {
-          setState({ status: "ready", catalog, info, stats });
+          setState({ status: "ready", catalog, info, stats, session, live, opportunities });
         }
       })
       .catch((error: unknown) => {
